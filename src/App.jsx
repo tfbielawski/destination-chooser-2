@@ -1,35 +1,27 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback } from 'react';
+import { useFetch } from "./hooks/useFetch.jsx";
+import { fetchUserPlaces, updateUserPlaces } from "./helpers/http.js";
 import Places from './components/Places.jsx';
 import Modal from './components/Modal.jsx';
 import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 import logoImg from './assets/logo.png';
 import AvailablePlaces from './components/AvailablePlaces.jsx';
-import { fetchUserPlaces, updateUserPlaces } from "./helpers/http.js";
 import Error from "./components/Error.jsx";
 
 function App() {
   const selectedPlace = useRef();
 
   const [userPlaces, setUserPlaces] = useState([]);
-  const [isFetching, setIsFetching] = useState(false)
-  const [error, setError] = useState()
   const [errorUpdatingPlaces, setErrorUpdatingPlaces] = useState();
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  useEffect(() => {
-    async function fetchPlaces(){
-      setIsFetching(true);
-      try{
-        const places = await fetchUserPlaces();
-        setUserPlaces(places);
-      }
-      catch(error){
-        setError({message: message.error || "Failed to fetch user places."});
-      }
-      setIsFetching(false);
-    }
-    fetchPlaces()
-  }, []);
+  //Call fetchData custom hook, destructure the state saved in that hook
+  const {
+    isFetching, 
+    error, 
+    fetchedData,
+    setFetchedData
+  } = useFetch(fetchUserPlaces, []);
   
 
   function handleStartRemovePlace(place) {
@@ -77,7 +69,7 @@ function App() {
     }
 
     setModalIsOpen(false);
-  }, [userPlaces]);
+  }, [userPlaces, setFetchedData]);
 
   function handleError(){
     setErrorUpdatingPlaces(null);
@@ -116,12 +108,14 @@ function App() {
             isLoading={isFetching}
             title="I'd like to visit ..."
             fallbackText="Select the places you would like to visit below."
-            places={userPlaces}
+            places={fetchedData}
             onSelectPlace={handleStartRemovePlace}
           />
         }
 
-        <AvailablePlaces onSelectPlace={handleSelectPlace} />
+        <AvailablePlaces 
+          onSelectPlace={handleSelectPlace} 
+        />
       </main>
     </>
   );
