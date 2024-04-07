@@ -99,6 +99,9 @@ function App() {
           Create your personal collection of places you would like to visit or
           you have visited.
         </p>
+        <p>This app needs your location to sort the list of available places. Please allow location in your browser to see that 
+          functionality.
+        </p>
       </header>
       <main>
         {error && <Error title="An error occurred!" message={error.message}/>}
